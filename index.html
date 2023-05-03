@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <title>簽到表製作工具</title>
+    </head>
+    <body>
+        <input type="text" id="name" value="5/3 紓壓解憂站 – DIY植栽手作工作坊 簽到表" /><br/><br/>
+        <input type="text" id="place" value="七館前紅磚道" /><br/><br/>
+        <input type="text" id="time" value="112/05/03(三) 11:30~14:00" /><br/><br/>
+        <input type="text" id="count" value="50" /><br/><br/>
+        <textarea type="text" id="list" value="系所 學號 姓名" style="width: 400px; height: 600px;"></textarea><br/><br/>
+        <input type="button" id="submit" value="產生" /><br/><br/>
+    </body>
+    <script>
+        document.getElementById("submit").addEventListener("click", function(){createTable()});
+        function createTable(){
+            const list = document.getElementById("list").value;
+            const count = parseInt(document.getElementById("count").value);
+            const myWindow = window.open("", "Window", "");
+            let content = '';
+            let page = 1;
+            content = getHead(page++);
+            const listArray = list.split("\n");
+            for(let i = 0; i < count; i++){
+                if(i > listArray.length-1){
+                    content += `<tr align="center">`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${parseInt(i)+1}</td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
+                    content += `<td style="padding-top:5px;padding-bottom:5px;"></td>`;
+                    content += `</tr>`;  
+                }else{
+                    let array = listArray[i].split("\t");
+                    content += `<tr align="center">`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${parseInt(i)+1}</td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[0]||""}</td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[1]||""}</td>`;
+                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[2]||""}</td>`;
+                    content += `<td style="padding-top:5px;padding-bottom:5px;"></td>`;
+                    content += `</tr>`;  
+                }
+                if(i%25 == 24){
+                    content += `</tbody></table></div>`;
+                    // content += `<p style="width:100%;align:center; position: absolute;top: ${(25+(page-1)*29.7)+'cm'};">${page++}</p>`
+                    content += `</div>`
+                    content += getHead(page++);
+                }
+            }
+            myWindow.document.write(content);
+            myWindow.print();
+        }
+        function getHead(page){
+            const name = document.getElementById("name").value;
+            const place = document.getElementById("place").value;
+            const time = document.getElementById("time").value;
+            let head = `<div style="height:29.7cm; width:27cm;padding-left:10px;padding-right:10px;padding-top:0px;margin:0px;top:${((page-1)*29.7)}cm;page-break-after:always;">`;
+            head += `<div style="width:100%; padding:0px; font-family:'Microsoft JhengHei'" align="center"><h1>${name}</h1></div>`;
+            head += `<div style="width:100%; margin-top:-20px;padding:0px;" align="center">
+                            <div style="width:50%; float:left; font-family:'Microsoft JhengHei'" align="center"><h3>活動地點:${place}</h3></div>
+                            <div style="width:0%; float:left;"></div>
+                            <div style="width:40%; float:left; font-family:'Microsoft JhengHei'" align="right"><h3>時間:${time}</h3></div>
+                        </div>`;
+            if(page == 1){
+                head += `<div style="width:100%; padding:0px; position: absolute; top:3.05cm;" align="center">`
+            }else{
+                head += `<div style="width:100%; padding:0px; position: absolute;top: ${((page-1)*40.455+3.4)}cm;" align="center">`
+            }
+            head += `<table border=1 style="border-collapse:collapse;border-style:solid"><thead><tr>`;
+            let headers = [{text:"編號", width:"2cm"}, {text:"系所", width:"6cm"}, {text:"學號", width:"4cm"}, {text:"姓名", width:"6.5cm"}, {text:"簽到", width:"6.5cm"}];
+            for(i in headers){
+                head += `<th style="padding-top:20px;padding-bottom:20px;width:${headers[i].width}; font-size:170%;border-style:solid" border=2>${headers[i].text}</th>`;
+            }
+            head += `</tr></thead>`;
+            head += `<tbody>`;
+            return head;
+        }
+        
+    </script>
+</html>
