@@ -1,79 +1,424 @@
-<html>
+<!doctype html>
+<html lang="zh-tw">
     <head>
-        <title>簽到表製作工具</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Demo</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+        <style>
+            .utteranceBox {
+                width: 100%;
+                background-color: rgba(255, 255, 255, 0);
+                border: 0;
+            }
+        </style>
     </head>
-    <body>
-        <input type="text" id="name" value="5/3 紓壓解憂站 – DIY植栽手作工作坊 簽到表" /><br/><br/>
-        <input type="text" id="place" value="七館前紅磚道" /><br/><br/>
-        <input type="text" id="time" value="112/05/03(三) 11:30~14:00" /><br/><br/>
-        <input type="text" id="count" value="50" /><br/><br/>
-        <textarea type="text" id="list" value="系所 學號 姓名" style="width: 400px; height: 600px;"></textarea><br/><br/>
-        <input type="button" id="submit" value="產生" /><br/><br/>
+    <body id="app">
+        <!-- As a heading -->
+        <nav class="navbar bg-body-tertiary">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1" style="font-size: 200%;">活動相關表格生成工具</span>
+            </div>
+        </nav>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col col-lg-2">
+                    <!--Card-->
+                    <div class="card shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+                        <div class="card-body">
+                            <h3 class="card-title">請選擇表格類型</h3>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" type="button"  @click="setType('receipt')">保證金收據</button>
+                                <button class="btn btn-primary" type="button"  @click="setType('ticket')">餐券</button>
+                                <button class="btn btn-primary" type="button"  @click="setType('sign-table')">簽到表</button>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="col col-lg-4" v-if="type == 'receipt'">
+                    <!--Card-->
+                    <div class="card shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+                        <div class="card-body">
+                            <h3 class="card-title">保證金收據</h3>
+                            <!--Input -->
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">收據標題</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="title">
+                            </div>
+                             <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動主辦人</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="host">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動名稱</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="name">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">保證金額</span>
+                                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="amount">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">生成張數</span>
+                                <input type="number" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="number" >
+                            </div>
+                            <div style="padding-top:10px" align="right">
+                                <a href="#" class="btn btn-primary" v-if="!busy" @click="generateSheet('receipt')">立即生成</a>
+                                <div class="spinner-border text-primary" role="status" v-if="busy">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="col col-lg-4" v-if="type == 'ticket'">
+                    <!--Card-->
+                    <div class="card shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+                        <div class="card-body">
+                            <h3 class="card-title">餐券</h3>
+                            <!--Input -->
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">餐券標題</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="title">
+                            </div>
+                             <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">餐券金額</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="amount">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動名稱</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="name">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">兌換期限</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="exp">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">餐券數量</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="number">
+                            </div>
+                            <div style="padding-top:10px" align="right">
+                                <a href="#" class="btn btn-primary" v-if="!busy" @click="generateSheet('ticket')">立即生成</a>
+                                <div class="spinner-border text-primary" role="status" v-if="busy">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                <div class="col col-lg-4" v-if="type == 'sign-table'">
+                    <!--Card-->
+                    <div class="card shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+                        <div class="card-body">
+                            <h3 class="card-title">簽到表</h3>
+                            <!--Input -->
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動名稱</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="name">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動時間</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="time">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">活動地點</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="place">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">人數</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="number">
+                            </div>
+                            <textarea type="text" v-model="nameList" value="系所 學號 姓名" style="width: 100%; height: 600px;"></textarea>
+                            <div style="padding-top:10px" align="right">
+                                <a href="#" class="btn btn-primary" v-if="!busy" @click="generateSheet('sign-table')">立即生成</a>
+                                <div class="spinner-border text-primary" role="status" v-if="busy">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <script>
+            const { createApp } = Vue
+            createApp({
+            data() {
+                return {
+                    busy: false,
+                    type: 'receipt',
+                    title:'1111 測試活動',
+                    name:'測試活動',
+                    place:'8303',
+                    time:'5/18 18:00 - 20:00',
+                    amount:80,
+                    number:20,
+                    host:'開發',
+                    exp:"112.05.20",
+                    nameList:""
+                }
+            },
+            methods: {
+                setType(type) {
+                    this.type = type
+                },
+                generateSheet(type){
+                    const myWindow = window.open("", type, "top=50,left=700,width=1000,height=800");
+                    this.busy = true
+                    if(type == 'receipt'){
+                        const style = `<style>
+                                            .container {
+                                                display: flex;
+                                                flex-wrap: wrap;
+                                                justify-content: center;
+                                                width: 100%;
+                                                height: 4.5cm;
+                                            }
+                                            table{
+                                                border-collapse: collapse;
+                                                width: 100%;
+                                                height:100%;
+                                                text-align: center;
+                                            }
+                                        </style>`;
+                        myWindow.document.write(style);
+                        let content = ``
+                        for(i = 1; i <= this.number; i++){
+                            let number = ("000"+i).slice(-2)
+                            if(i%4 == 1){
+                                content = `<div><h1>活動標題</h1></div>`
+                            }
+                                content += this.getReceiptTable(this.title, this.name, number, this.host, this.amount)
+                            if(i%4 == 0){
+                                myWindow.document.write(this.getLandscapePage(content))
+                                content = ``;
+                            }
+                        }
+                        if(content.length > 0){
+                            myWindow.document.write(this.getLandscapePage(content))
+                            content = ``;
+                        }
+                        myWindow.print();
+                        this.busy = false;
+                    }else if(type == 'ticket'){
+                        let style = `<style>table{
+                                                border-collapse: collapse;
+                                                width: 100%;
+                                                height:100%;
+                                                text-align: center;
+                                            };
+                                            p{
+                                                line-height: 5px;
+                                            }
+                                        </style>`;
+                        myWindow.document.write(style);
+                        myWindow.document.write("<body style='margin:0'>");
+                        let content = ``
+                        let tmp = 1;
+                        let counter = 1;
+                        while((tmp-1)*12 < this.number){
+                            myWindow.document.write(this.getTicketFirstSide(this.title, this.amount, this.name, this.exp, tmp*12, counter));
+                            myWindow.document.write(this.getTicketSecondSide(tmp*12, counter));
+                            counter += 12
+                            tmp += 1;
+                        }
+                        
+                        myWindow.print();
+                        this.busy = false;
+                    }else if(type == 'sign-table'){
+                        let style = `<style>
+                                    .container {
+                                        display: flex;
+                                        flex-wrap: wrap;
+                                        justify-content: center;
+                                        width: 100%;
+                                        height: 4.5cm;
+                                        margin-bottom:0px;
+                                    }
+                                    table{
+                                        margin-top:-3cm;
+                                        border-collapse: collapse;
+                                        width: 95%;
+                                        text-align: center;
+                                    }
+                                    </style>`;
+                        myWindow.document.write(style);
+                        myWindow.document.write("<body style='margin:0'>");
+                        let content = ``
+                        let tmp = 1;
+                        let counter = 1;
+                        while((tmp-1)*20 < this.number){
+                            myWindow.document.write(this.getProtraitPage(this.getSignTable(this.nameList, this.name, this.place, this.time, tmp*20, counter)));
+                            counter += 20
+                            tmp += 1;
+                        }
+                        
+                        myWindow.print();
+                        this.busy = false;
+                    }
+                },
+                getLandscapePage(content){
+                    return `<div style="width:29.7cm;padding-left:0px;padding-right:0px;padding-top:0px;padding-bottom:0px;margin:0px; font-family:'Microsoft JhengHei';page-break-after:always" align="center">${content}</div>`
+                },
+                getProtraitPage(content){
+                    return `<div style="width:21cm;padding-left:0px;padding-right:0px;padding-top:0px;padding-bottom:0px;margin:0px; font-family:'Microsoft JhengHei';page-break-after:always" align="center">${content}</div>`
+                },
+                getReceiptTable(title, name, number, host, amount){
+                    return ` <div class="container">
+                                <div style="width:14cm;height:3.5cm;border: 2px solid black;;">
+                                    <table border="1">
+                                        <tr>
+                                            <td colspan="6">${title}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" align="left" style="padding-left:0.5cm">${number} 活動主持人: ${host}</td>
+                                            <td colspan="2" align="center">存根聯-單位留存</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:3.3cm">活動名稱</td>
+                                            <td style="width:2cm">學號</td>
+                                            <td style="width:3.5cm">姓名</td>
+                                            <td style="width:1.8cm">保證金</td>
+                                            <td style="width:1.8cm">日期</td>
+                                            <td style="width:1.8cm">經手人</td>
+                                        </tr>
+                                        <tr>
+                                            <td>${name}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>${amount}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="width:0.5cm;"></div>
+                                <div style="width:14cm;height:3.5cm; border: 2px solid black;;">
+                                    <table border="1">
+                                        <tr>
+                                            <td colspan="6">${title} 保證金收據</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" align="left" style="padding-left:0.5cm">${number} 活動主持人: ${host}</td>
+                                            <td colspan="2" align="center">收執聯-同學留存</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:3.3cm">活動名稱</td>
+                                            <td style="width:2cm">學號</td>
+                                            <td style="width:3.5cm">姓名</td>
+                                            <td style="width:1.8cm">保證金</td>
+                                            <td style="width:1.8cm">日期</td>
+                                            <td style="width:1.8cm">經手人</td>
+                                        </tr>
+                                        <tr>
+                                            <td>${name}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>${amount}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>`
+                },
+                getTicketFirstSide(title, amount, name, exp, number, index){
+                    let content = `<div style="width:21cm; font-family:'Microsoft JhengHei';page-break-after:always;" align="center">
+                    <table border="1">`
+                    for(i = index; i <= number; i++){
+                        if(i%2 == 1){
+                            content += `<tr>`
+                        }
+                        content += `<td>
+                                        <div>
+                                            <p style="font-size: 200%;">${title}</p>
+                                            <p style="font-size: 180%;margin-top:-35px">${amount}元</p>
+                                            <p style="margin-top:-30px">${name} 兌換期限至 ${exp} 止</p>
+                                            <p>本券僅限元智大學學生與教職員使用</p>
+                                            <p>元智大學諮商與就業輔導組製 ${i}</p>
+                                        </div>
+                                    </td>`
+                        if(i%2 == 0){
+                            content += `</tr>`
+                        }
+                    }
+                    content += `</table></div>`
+                    return content
+                },
+                getTicketSecondSide(number, index ){
+                    let content = `<div style="width:21cm; font-family:'Microsoft JhengHei';page-break-after:always;" align="center">
+                    <table border="1">`
+                    for(i = index; i <= number; i++){
+                        if(i%2 == 1){
+                            content += `<tr>`
+                        }
+                        content += `<td>
+                                        <div align="left" style="font-size:90%">
+                                            <p>1.本券供報名諮就組講座參加者使用，無諮就組章無效</p>
+                                            <p>2.使用時請先出示本券，並交由店家回收</p>
+                                            <p>3.本券限換等值商品，可補差額購買，恕不找零</p>
+                                            <p>4.本券限單次使用，逾期即失去效力，不予兌換</p>
+                                            <p>承辦人:</p>
+                                        </div>
+                                    </td>`
+                        if(i%2 == 0){
+                            content += `</tr>`
+                        }
+                    }
+                    content += `</table></div>`
+                    return content
+                },
+                getSignTable(nameList, name, place, time, number, index){
+                    let content = `<div><h1>${name}</h1></div>
+                                    <div class="container">
+                                        <div style="width:6cm;height:1.5cm;" align="center">
+                                            <p>活動地點:${place}</p>
+                                        </div>
+                                        <div style="width:8cm;" align="center">
+                                            <p>主辦單位:諮商與就業輔導組</p>
+                                        </div>
+                                        <div style="width:7cm;height:1.5cm;" align="center">
+                                            <p>時間:${time}</p>
+                                        </div>
+                                    </div>
+                                    <table border="1">
+                                        <thead>
+                                            <tr>
+                                                <th style="padding-top:20px;padding-bottom:20px;width:1.5cm; font-size:170%;border-style:solid" border=2>編號</th>
+                                                <th style="padding-top:20px;padding-bottom:20px;width:5cm; font-size:170%;border-style:solid" border=2>系級</th>
+                                                <th style="padding-top:20px;padding-bottom:20px;width:3.5cm; font-size:170%;border-style:solid" border=2>學號</th>
+                                                <th style="padding-top:20px;padding-bottom:20px;width:5cm; font-size:170%;border-style:solid" border=2>姓名</th>
+                                                <th style="padding-top:20px;padding-bottom:20px;width:5.5cm; font-size:170%;border-style:solid" border=2>簽到</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`
+                    let nameArray = nameList.split("\n")
+                    for(i = index; i <= number; i++){
+                        if(i<nameList.length && nameArray[i-1]){
+                            let arrayParam = nameArray[i-1].split("\t")
+                            content += `<tr>
+                                            <td style="padding-top:11px;padding-bottom:11px;">${i}</td>
+                                            <td style="padding-top:11px;padding-bottom:11px;">${arrayParam[0]}</td>
+                                            <td style="padding-top:11px;padding-bottom:11px;">${arrayParam[1]}</td>
+                                            <td style="padding-top:11px;padding-bottom:11px;">${arrayParam[2]}</td>
+                                            <td style="padding-top:11px;padding-bottom:11px;"></td>
+                                        </tr>`
+                        }else{
+                            content += `<tr>
+                                            <td style="padding-top:11px;padding-bottom:11px;">${i}</td>
+                                            <td style="padding-top:11px;padding-bottom:11px;"></td>
+                                            <td style="padding-top:11px;padding-bottom:11px;"></td>
+                                            <td style="padding-top:11px;padding-bottom:11px;"></td>
+                                            <td style="padding-top:11px;padding-bottom:11px;"></td>
+                                        </tr>`
+                        }
+                    }
+                    content += ` </tbody></table>`
+                    return content
+                }
+            },
+            }).mount('#app')
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     </body>
-    <script>
-        document.getElementById("submit").addEventListener("click", function(){createTable()});
-        function createTable(){
-            const list = document.getElementById("list").value;
-            const count = parseInt(document.getElementById("count").value);
-            const myWindow = window.open("", "Window", "");
-            let content = '';
-            let page = 1;
-            content = getHead(page++);
-            const listArray = list.split("\n");
-            for(let i = 0; i < count; i++){
-                if(i > listArray.length-1){
-                    content += `<tr align="center">`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${parseInt(i)+1}</td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;"></td>`;
-                    content += `<td style="padding-top:5px;padding-bottom:5px;"></td>`;
-                    content += `</tr>`;  
-                }else{
-                    let array = listArray[i].split("\t");
-                    content += `<tr align="center">`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${parseInt(i)+1}</td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[0]||""}</td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[1]||""}</td>`;
-                    content += `<td style="padding-top:11px;padding-bottom:11px;font-size:130%;">${array[2]||""}</td>`;
-                    content += `<td style="padding-top:5px;padding-bottom:5px;"></td>`;
-                    content += `</tr>`;  
-                }
-                if(i%25 == 24){
-                    content += `</tbody></table></div>`;
-                    // content += `<p style="width:100%;align:center; position: absolute;top: ${(25+(page-1)*29.7)+'cm'};">${page++}</p>`
-                    content += `</div>`
-                    content += getHead(page++);
-                }
-            }
-            myWindow.document.write(content);
-            myWindow.print();
-        }
-        function getHead(page){
-            const name = document.getElementById("name").value;
-            const place = document.getElementById("place").value;
-            const time = document.getElementById("time").value;
-            let head = `<div style="height:29.7cm; width:27cm;padding-left:10px;padding-right:10px;padding-top:0px;margin:0px;top:${((page-1)*29.7)}cm;page-break-after:always;">`;
-            head += `<div style="width:100%; padding:0px; font-family:'Microsoft JhengHei'" align="center"><h1>${name}</h1></div>`;
-            head += `<div style="width:100%; margin-top:-20px;padding:0px;" align="center">
-                            <div style="width:50%; float:left; font-family:'Microsoft JhengHei'" align="center"><h3>活動地點:${place}</h3></div>
-                            <div style="width:0%; float:left;"></div>
-                            <div style="width:40%; float:left; font-family:'Microsoft JhengHei'" align="right"><h3>時間:${time}</h3></div>
-                        </div>`;
-            if(page == 1){
-                head += `<div style="width:100%; padding:0px; position: absolute; top:3.05cm;" align="center">`
-            }else{
-                head += `<div style="width:100%; padding:0px; position: absolute;top: ${((page-1)*40.455+3.4)}cm;" align="center">`
-            }
-            head += `<table border=1 style="border-collapse:collapse;border-style:solid"><thead><tr>`;
-            let headers = [{text:"編號", width:"2cm"}, {text:"系所", width:"6cm"}, {text:"學號", width:"4cm"}, {text:"姓名", width:"6.5cm"}, {text:"簽到", width:"6.5cm"}];
-            for(i in headers){
-                head += `<th style="padding-top:20px;padding-bottom:20px;width:${headers[i].width}; font-size:170%;border-style:solid" border=2>${headers[i].text}</th>`;
-            }
-            head += `</tr></thead>`;
-            head += `<tbody>`;
-            return head;
-        }
-        
-    </script>
 </html>
