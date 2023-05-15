@@ -186,7 +186,7 @@
                         for(i = 1; i <= this.number; i++){
                             let number = ("000"+i).slice(-2)
                             if(i%4 == 1){
-                                content = `<div><h1>${{this.title}}</h1></div>`
+                                content = `<div><h1>${this.title}</h1></div>`
                             }
                                 content += this.getReceiptTable(this.title, this.name, number, this.host, this.amount)
                             if(i%4 == 0){
