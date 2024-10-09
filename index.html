@@ -93,6 +93,10 @@
                                 <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="exp">
                             </div>
                             <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">兌換地點</span>
+                                <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="store">
+                            </div>
+                            <div class="input-group mb-3">
                                 <span class="input-group-text" id="inputGroup-sizing-default">餐券數量</span>
                                 <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" v-model="number">
                             </div>
@@ -155,7 +159,8 @@
                     number:20,
                     host:'XXX',
                     exp:"112.05.20",
-                    nameList:""
+                    nameList:"",
+                    store:""
                 }
             },
             methods: {
@@ -218,7 +223,7 @@
                         let counter = 1;
                         while((tmp-1)*12 < this.number){
                             myWindow.document.write(this.getTicketFirstSide(this.title, this.amount, this.name, this.exp, tmp*12, counter));
-                            myWindow.document.write(this.getTicketSecondSide(tmp*12, counter));
+                            myWindow.document.write(this.getTicketSecondSide(tmp*12, counter, this.store));
                             counter += 12
                             tmp += 1;
                         }
@@ -331,7 +336,7 @@
                         }
                         content += `<td>
                                         <div>
-                                            <p style="font-size: 200%;">${title}</p>
+                                            <p style="font-size: 190%;">${title}</p>
                                             <p style="font-size: 180%;margin-top:-35px">${amount}元</p>
                                             <p style="margin-top:-30px">${name} 兌換期限至 ${exp} 止</p>
                                             <p>本券僅限元智大學學生與教職員使用</p>
@@ -345,7 +350,7 @@
                     content += `</table></div>`
                     return content
                 },
-                getTicketSecondSide(number, index ){
+                getTicketSecondSide(number, index ,store){
                     let content = `<div style="width:21cm; font-family:'Microsoft JhengHei';page-break-after:always;" align="center">
                     <table border="1">`
                     for(i = index; i <= number; i++){
@@ -358,7 +363,7 @@
                                             <p>2.使用時請先出示本券，並交由店家回收</p>
                                             <p>3.本券限換等值商品，可補差額購買，恕不找零</p>
                                             <p>4.本券限單次使用，逾期即失去效力，不予兌換</p>
-                                            <p>5.本券可至天河書屋、陶邑心情兌換</p>
+                                            <p>5.本券可至${store}兌換</p>
                                             <p>承辦人:</p>
                                         </div>
                                     </td>`
